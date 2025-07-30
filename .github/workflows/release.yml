@@ -1,0 +1,38 @@
+name: Release plasmoid
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq & zip
+        run: sudo apt-get update && sudo apt-get install -y jq zip
+      - name: Build .plasmoid
+        run: |
+          chmod +x pack.sh
+          ./pack.sh
+          echo "PKG=$(ls dist/*.plasmoid | head -n1)" >> $GITHUB_ENV
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plasmoid
+          path: ${{ env.PKG }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: plasmoid
+          path: dist
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.plasmoid
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
