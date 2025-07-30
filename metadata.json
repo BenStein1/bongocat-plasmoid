@@ -1,0 +1,19 @@
+{
+  "KPlugin": {
+    "Id": "org.kde.plasma.bongocat",
+    "Name": "BongoCat",
+    "Description": "CPU-driven Bongo Cat animation",
+    "Icon": "utilities-system-monitor",
+    "Version": "1.0",
+    "License": "GPL-2.0+",
+    "Authors": [
+      { "Name": "Ben Conner", "Email": "dev@connertechnical.com" }
+    ],
+    "Category": "System",
+    "FormFactors": ["desktop", "tablet", "handset"],
+    "EnabledByDefault": true,
+    "ServiceTypes": ["Plasma/Applet"]
+  },
+  "X-Plasma-API": "declarativeappletscript",
+  "X-Plasma-MainScript": "ui/main.qml"
+}

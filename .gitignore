@@ -1,0 +1,16 @@
+# KDE/Qt build & editor cruft
+*.plasmoid
+*.zip
+*~
+*.kate-swp
+.DS_Store
+.directory
+Thumbs.db
+
+# build/output
+/build/
+/dist/
+
+# IDEs
+.vscode/
+.idea/
