@@ -1,9 +1,10 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.plasmoid 2.0
+import QtQuick.Window 2.0
 
 // Wayland-specific window management
-Item {
+Plasmoid {
     id: root
     // Default desktop size
     implicitWidth: 388
@@ -137,7 +138,6 @@ Item {
                 root.cpuPercent = usage;
             }
         }
-        xhr.send();
     }
 
     // Smoother animation timing for Wayland
@@ -161,8 +161,7 @@ Item {
         sourceSize.height: height
     }
 
-    // Optional debug overlay
-    Rectangle {
+            Rectangle {
         visible: root.debugVisible
         color: "#66000000"
         radius: 4
