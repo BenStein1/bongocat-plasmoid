@@ -2,13 +2,16 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.plasmoid 2.0
 
+// Wayland-specific window management
 Item {
     id: root
     // Default desktop size
     implicitWidth: 388
     implicitHeight: 86
 
-    // No frame/shadow background
+    // Explicitly set decorations for Wayland compatibility
+    Plasmoid.decorate: false
+    Plasmoid.windowButtonsVisible: false
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
     // Frames
@@ -70,10 +73,11 @@ Item {
     // --- CPU via /proc/stat ---
     function pollCpu() {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "file:///proc/stat");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return;
-            var txt = xhr.responseText || "";
+        // Wayland-compatible file reading
+        var process = new QProcess();
+        process.start('cat', ['/proc/stat']);
+        process.waitForFinished();
+        var txt = process.readAllStandardOutput().toString();
             var firstLine = txt.split("\n")[0];
             if (!firstLine) return;
             var parts = firstLine.trim().split(/\s+/);
@@ -136,11 +140,12 @@ Item {
         xhr.send();
     }
 
+    // Smoother animation timing for Wayland
     Timer {
         id: poll
         repeat: true
         running: true
-        interval: 500
+        interval: 1000 // Reduced polling frequency for better performance
         onTriggered: pollCpu()
         Component.onCompleted: pollCpu()
     }
