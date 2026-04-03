@@ -39,7 +39,14 @@ if [[ ! -f metadata.json || ! -d contents ]]; then
   exit 1
 fi
 
-# Create package with correct top-level layout
-zip -r -9 "$out" metadata.json contents > /dev/null
+# Create package with correct top-level layout (metadata.json at root)
+echo "Creating zip package..."
+zip -r9 --exclude=*.git* "$out" metadata.json contents > /dev/null
+
+# Verify package creation
+if [[ ! -f "$out" ]]; then
+  echo "ERROR: Failed to create package file $out" >&2
+  exit 1
+fi
 
 echo "Built: $out"
