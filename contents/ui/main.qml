@@ -136,7 +136,6 @@ Plasmoid {
                 root.wasIdle = nowIdle;
                 root.cpuPercent = usage;
             }
-    }
 
     // Smoother animation timing for Wayland
     Timer {
