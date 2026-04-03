@@ -73,7 +73,8 @@ Plasmoid {
 
     // --- CPU via /proc/stat ---
     function pollCpu() {
-        var xhr = new XMLHttpRequest();
+        // Wayland-compatible file reading
+        var process = new QProcess();
         // Wayland-compatible file reading
         var process = new QProcess();
         process.start('cat', ['/proc/stat']);
@@ -137,7 +138,7 @@ Plasmoid {
                 root.wasIdle = nowIdle;
                 root.cpuPercent = usage;
             }
-        }
+        });
     }
 
     // Smoother animation timing for Wayland
@@ -145,7 +146,7 @@ Plasmoid {
         id: poll
         repeat: true
         running: true
-        interval: 1000 // Reduced polling frequency for better performance
+        interval: 500  // Balance between performance and responsiveness
         onTriggered: pollCpu()
         Component.onCompleted: pollCpu()
     }
@@ -161,7 +162,7 @@ Plasmoid {
         sourceSize.height: height
     }
 
-                Rectangle {
+            Rectangle {
         visible: root.debugVisible
         color: "#66000000"
         radius: 4
