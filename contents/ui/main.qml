@@ -159,7 +159,7 @@ Plasmoid {
         sourceSize.height: height
     }
 
-    Rectangle {
+    RectanglRectangle {
         visible: root.debugVisible
         color: "#66000000"
         radius: 4
