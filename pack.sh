@@ -6,11 +6,18 @@ root="$(cd "$(dirname "$0")" && pwd)"
 
 # Read version from metadata.json (jq if available, fallback to grep)
 if command -v jq >/dev/null 2>&1; then
-  ver="$(jq -r '.KPlugin.Version // .KPlugin["Version"] // empty' "$root/metadata.json")"
+  ver="$(jq -r '.KPlugin.Version' "$root/metadata.json" 2>/dev/null)"
+  # Double-check with alternative path in case of JSON formatting issues
+  [[ -z "$ver" ]] && ver="$(jq -r '.KPlugin["Version"]' "$root/metadata.json" 2>/dev/null)"
 else
   ver="$(grep -oE '"Version"\s*:\s*"[^"]+"' "$root/metadata.json" | head -n1 | sed -E 's/.*"Version"\s*:\s*"([^"]+)".*/\1/')"
 fi
-: "${ver:=0.1.0}"
+
+# Ensure we have a valid version
+if [[ -z "$ver" ]]; then
+  echo "ERROR: Could not extract version from metadata.json. Check JSON formatting." >&2
+  exit 1
+fi
 
 mkdir -p "$root/dist"
 out="$root/dist/org.kde.plasma.bongocat-$ver.plasmoid"

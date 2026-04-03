@@ -1,5 +1,4 @@
 {
-  // Wayland support added
   "KPlugin": {
     "Id": "org.kde.plasma.bongocat",
     "Name": "BongoCat",
