@@ -23,7 +23,15 @@ mkdir -p "$root/dist"
 out="$root/dist/org.kde.plasma.bongocat-$ver.plasmoid"
 
 cd "$root"
+# Force overwrite existing package
+if [[ -f "$out" ]]; then
+  echo "Overwriting existing package: $out"
+fi
 rm -f "$out"
+
+# Verbose logging
+echo "Packaging files:"
+ls -la metadata.json contents/
 
 # Sanity check
 if [[ ! -f metadata.json || ! -d contents ]]; then
