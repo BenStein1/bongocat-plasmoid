@@ -75,8 +75,6 @@ Plasmoid {
     function pollCpu() {
         // Wayland-compatible file reading
         var process = new QProcess();
-        // Wayland-compatible file reading
-        var process = new QProcess();
         process.start('cat', ['/proc/stat']);
         process.waitForFinished();
         var txt = process.readAllStandardOutput().toString();
@@ -138,7 +136,6 @@ Plasmoid {
                 root.wasIdle = nowIdle;
                 root.cpuPercent = usage;
             }
-        });
     }
 
     // Smoother animation timing for Wayland
@@ -162,7 +159,7 @@ Plasmoid {
         sourceSize.height: height
     }
 
-            Rectangle {
+    Rectangle {
         visible: root.debugVisible
         color: "#66000000"
         radius: 4
