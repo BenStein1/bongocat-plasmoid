@@ -73,8 +73,6 @@ Plasmoid {
 
     // --- CPU via /proc/stat ---
     function pollCpu() {
-        // Wayland-compatible file reading
-        var process = new QProcess();
         process.start('cat', ['/proc/stat']);
         process.waitForFinished();
         var txt = process.readAllStandardOutput().toString();
@@ -144,7 +142,6 @@ Plasmoid {
         running: true
         interval: 500  // Balance between performance and responsiveness
         onTriggered: pollCpu()
-        Component.onCompleted: pollCpu()
     }
 
     // Visual
