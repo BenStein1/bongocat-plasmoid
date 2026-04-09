@@ -1,23 +1,25 @@
 {
-  "X-Plasma": {
-    "RequiredVersion": "6.0",
-    "Platform": "plasma"
-  },
   "KPlugin": {
     "Id": "org.kde.plasma.bongocat",
     "Name": "BongoCat",
-    "Description": "CPU-driven Bongo Cat animation with Wayland support",
+    "Description": "CPU-driven Bongo Cat animation",
     "Icon": "utilities-system-monitor",
-    "Version": "6.0",
+    "Version": "1.0",
     "License": "GPL-2.0+",
     "Authors": [
-      { "Name": "Ben Conner", "Email": "dev@connertechnical.com" }
+      {
+        "Name": "Ben Conner",
+        "Email": "dev@connertechnical.com"
+      }
     ],
     "Category": "System",
-    "FormFactors": ["desktop", "tablet", "handset"],
-    "EnabledByDefault": true,
-    "ServiceTypes": ["Plasma/Applet"]
+    "FormFactors": [
+      "desktop",
+      "tablet",
+      "handset"
+    ],
+    "EnabledByDefault": true
   },
-  "X-Plasma-API": "declarativeappletscript",
-  "X-Plasma-MainScript": "ui/main.qml"
+  "KPackageStructure": "Plasma/Applet",
+  "X-Plasma-API-Minimum-Version": "6.0"
 }
