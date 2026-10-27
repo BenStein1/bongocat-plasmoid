@@ -1,6 +1,7 @@
 import QtQuick
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
+import org.kde.ksysguard.sensors 1.0 as Sensors
 
 PlasmoidItem {
     id: root
@@ -36,10 +37,6 @@ PlasmoidItem {
     property int idleBlinkMin: 1800
     property int idleBlinkMax: 15000
 
-    property double _prevIdle: 0
-    property double _prevTotal: 0
-    property bool _havePrev: false
-
     function intervalFor(percent) {
         var ms = Math.ceil(5000 / Math.sqrt(percent + 35) - 400)
         if (ms < 70)
@@ -72,90 +69,52 @@ PlasmoidItem {
         beatsRemaining = beatsForMove(cpuPercent)
     }
 
-    function pollCpu() {
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", "file:///proc/stat")
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
-                return
+    // KSystemStats provides CPU usage without local-file XHR or polling.
+    function updateCpu(value) {
+        var usage = Number(value)
+        if (!isFinite(usage))
+            return
 
-            var txt = xhr.responseText || ""
-            var firstLine = txt.split("\n")[0]
-            if (!firstLine)
-                return
+        usage = Math.max(0, Math.min(100, usage))
+        var nowIdle = usage < root.idleThreshold
 
-            var parts = firstLine.trim().split(/\s+/)
-            if (parts.length < 5 || parts[0] !== "cpu")
-                return
-
-            var user = parseInt(parts[1]) || 0
-            var nice = parseInt(parts[2]) || 0
-            var system = parseInt(parts[3]) || 0
-            var idle = parseInt(parts[4]) || 0
-            var iowait = parseInt(parts[5]) || 0
-            var irq = parseInt(parts[6]) || 0
-            var softirq = parseInt(parts[7]) || 0
-            var steal = parseInt(parts[8] || "0") || 0
-
-            var idleAll = idle + iowait
-            var nonIdle = user + nice + system + irq + softirq + steal
-            var total = idleAll + nonIdle
-
-            if (!root._havePrev) {
-                root._prevIdle = idleAll
-                root._prevTotal = total
-                root._havePrev = true
-                return
-            }
-
-            var totald = total - root._prevTotal
-            var idled = idleAll - root._prevIdle
-
-            root._prevTotal = total
-            root._prevIdle = idleAll
-
-            if (totald > 0) {
-                var usage = (1.0 - (idled / totald)) * 100.0
-                if (usage < 0)
-                    usage = 0
-                if (usage > 100)
-                    usage = 100
-
-                var nowIdle = (usage < root.idleThreshold)
-
-                if (nowIdle && !root.wasIdle) {
-                    sprite.source = root.idleFrame
-                    currentMove = -1
-                    currentSide = 0
-                    beatsRemaining = 0
-                    anim.interval = root.nextIdleBlinkInterval()
-                    anim.restart()
-                } else if (!nowIdle && root.wasIdle) {
-                    currentMove = -1
-                    currentSide = 0
-                    beatsRemaining = 0
-                    anim.interval = root.intervalFor(usage)
-                    anim.restart()
-                } else if (!nowIdle) {
-                    anim.interval = root.intervalFor(usage)
-                }
-
-                root.wasIdle = nowIdle
-                root.cpuPercent = usage
-            }
+        if (nowIdle && !root.wasIdle) {
+            sprite.source = root.idleFrame
+            currentMove = -1
+            currentSide = 0
+            beatsRemaining = 0
+            anim.interval = root.nextIdleBlinkInterval()
+            anim.restart()
+        } else if (!nowIdle && root.wasIdle) {
+            currentMove = -1
+            currentSide = 0
+            beatsRemaining = 0
+            anim.interval = root.intervalFor(usage)
+            anim.restart()
+        } else if (!nowIdle) {
+            anim.interval = root.intervalFor(usage)
         }
-        xhr.send()
+
+        root.wasIdle = nowIdle
+        root.cpuPercent = usage
     }
 
-    Timer {
-        id: poll
-        repeat: true
-        running: true
-        interval: 500
+    // Keep this sensor ID fixed to avoid leaking subscriptions on some
+    // libksysguard versions when changing IDs dynamically.
+    Sensors.Sensor {
+        id: cpuSensor
+        sensorId: "cpu/all/usage"
+        enabled: root.visible
+        updateRateLimit: 500
 
-        onTriggered: pollCpu()
-
-        Component.onCompleted: pollCpu()
+        onValueChanged: {
+            if (status === Sensors.Sensor.Ready)
+                root.updateCpu(cpuSensor.value)
+        }
+        onStatusChanged: {
+            if (status === Sensors.Sensor.Ready)
+                root.updateCpu(cpuSensor.value)
+        }
     }
 
     Image {
@@ -190,7 +149,7 @@ PlasmoidItem {
     Timer {
         id: anim
         repeat: true
-        running: true
+        running: root.visible
         interval: root.nextIdleBlinkInterval()
 
         onTriggered: {
