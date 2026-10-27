@@ -71,6 +71,9 @@ PlasmoidItem {
 
     // KSystemStats provides CPU usage without local-file XHR or polling.
     function updateCpu(value) {
+        if (value === null || value === undefined)
+            return
+
         var usage = Number(value)
         if (!isFinite(usage))
             return
